@@ -4,7 +4,7 @@ const Challenge = require('../db/Schemas/Challenge');
 const Task = require('../db/Schemas/Task');
 require('dotenv').config();
 const openai = new OpenAI({
-    apiKey: 'process.env.API_KEY'
+    apiKey: process.env.API_KEY
 });
 
 

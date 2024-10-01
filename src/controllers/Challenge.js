@@ -5,7 +5,7 @@ const Task = require('../db/Schemas/Task');
 const User = require('../db/Schemas/User');
 const Result = require('../db/Schemas/Result');
 const openai = new OpenAI({
-    apiKey: 'process.env.API_KEY'
+    apiKey: process.env.API_KEY
 });
 
 

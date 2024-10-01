@@ -1,7 +1,7 @@
 const User = require("../db/Schemas/User");
 require('dotenv').config();
 const { BlobServiceClient } = require('@azure/storage-blob');
-const blobService = BlobServiceClient.fromConnectionString('process.env.AZURE_KEY')
+const blobService = BlobServiceClient.fromConnectionString(process.env.AZURE_KEY)
 
 
 const register = async (req, res) => {
