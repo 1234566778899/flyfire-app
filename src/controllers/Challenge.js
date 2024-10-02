@@ -8,7 +8,6 @@ const openai = new OpenAI({
     apiKey: process.env.API_KEY
 });
 
-
 const generate = async (req, res) => {
     try {
         const { lenguaje, level, topics, count, users } = req.body;
