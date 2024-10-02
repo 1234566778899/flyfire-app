@@ -4,17 +4,14 @@ const cors = require('cors');
 const server = require('http').createServer(app);
 
 app.use(express.json());
-app.use(cors({
-    origin: ['http://localhost:3000', 'https://flyfar-liard.vercel.app'],
-    credentials: true
-}));
+app.use(cors());
 
 require('./db/index')
 require('./socket.js')(server);
 
 const PORT = process.env.PORT || 4000;
 app.get('/', (req, res) => {
-    res.send('v.1.0.13')
+    res.send('v.1.0.1')
 })
 
 app.use('/challenge', require('./routes/Challenge.js'));
