@@ -4,7 +4,10 @@ const cors = require('cors');
 const server = require('http').createServer(app);
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:3000', 'https://flyfar-liard.vercel.app'],
+    credentials: true
+}));
 
 require('./db/index')
 require('./socket.js')(server);
