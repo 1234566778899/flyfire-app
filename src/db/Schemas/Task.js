@@ -10,7 +10,9 @@ const ChallengeSchema = Schema({
     explanation: String,
     user: { type: mongoose.Schema.ObjectId, ref: 'user' },
     lenguaje: String,
-    challenge: { type: mongoose.Schema.ObjectId, ref: 'challenge' }
+    challenge: { type: mongoose.Schema.ObjectId, ref: 'challenge' },
+    score: Number,
+    finished: { type: Boolean, default: false }
 }, {
     timestamps: true
 })

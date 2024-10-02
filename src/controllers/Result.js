@@ -38,10 +38,53 @@ const addResult = async (req, res) => {
         res.status(500).send({ error: 'Error en el servidor' });
     }
 }
+const addOneResult = async (req, res) => {
+    try {
+        const { user, task, title, lenguaje, challenge, result, time } = req.body;
+        const completion = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [
+                {
+                    role: "system",
+                    content: `Eres un asistente IA que evalua una respuesta de programación, la pregunta es la siguiente: ${JSON.stringify(task)} y la respuesta es ${JSON.stringify(result)}. Debes asignar un puntaje del 1 al 20 de acuerda a la respuesta, si cumple con todos lo requerido entonces se asigna un 20, sino hay nada, tiene un 0, y otro valor de acuerdo al porcentaje de avance. Da como respuesta solo un json con la siguiente estructura: {score:Number,comment:String}.`
+                },
+                {
+                    role: "user",
+                    content: "Evalua la respuesta"
+                }
+            ],
+            temperature: 1
+        })
+        const text = completion.choices[0].message.content;
+        const jsonResponse = text.match(/\{.*\}/s);
+        const { score, comment } = JSON.parse(jsonResponse);
+        const data = { user, task: task._id, score, title, lenguaje, challenge, time, comment }
+        const resp = new Result(data);
+        await resp.save();
+        const resps = await Result.find({ task: task._id });
+        const scoreMax = Math.max(...resps.map(x => x.score), Number(score));
+        await Task.findOneAndUpdate({ _id: task._id }, { score: scoreMax });
+        return res.status(200).send({ score });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ error: 'Error on server' });
+    }
+}
 const getSubmissions = async (req, res) => {
     try {
         const { user, challenge } = req.body;
         const results = await Result.find({ user, challenge });
+        res.status(200).send(results);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ error: 'Error en el servidor' });
+    }
+}
+const getSubmissionsByTask = async (req, res) => {
+    try {
+        const { taskId } = req.params;
+        console.log(taskId)
+        const results = await Result.find({ task: taskId });
         res.status(200).send(results);
     } catch (error) {
         console.log(error);
@@ -136,5 +179,7 @@ module.exports = {
     addResult,
     getSubmissions,
     getCurrentRanking,
-    generalRanking
+    generalRanking,
+    getSubmissionsByTask,
+    addOneResult
 }

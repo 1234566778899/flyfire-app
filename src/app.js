@@ -19,6 +19,7 @@ app.use('/users', require('./routes/User'));
 app.use('/friends', require('./routes/Friend'));
 app.use('/results', require('./routes/Result.js'));
 app.use('/notifications', require('./routes/Notification.js'));
+app.use('/tasks', require('./routes/Task.js'));
 
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

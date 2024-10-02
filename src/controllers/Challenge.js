@@ -63,7 +63,7 @@ const generateIndividualChallenges = async (req, res) => {
             avr = parseInt(result[0].averageScore / 2);
 
         }
-        const tks = await Task.find({ user });
+        const tks = await Task.find({ user, finished: false });
         if (tks.length >= 10) {
             return res.status(200).send(tks);
         }
@@ -89,7 +89,7 @@ const generateIndividualChallenges = async (req, res) => {
         await Task.insertMany(tasks.map(x => ({ ...x, user })));
         return res.status(200).send([...tks, ...tasks]);
     } catch (error) {
-        console.log(error.response);
+        console.log(error);
         return res.status(500).send({ error: 'Error en el servidor' });
     }
 }
@@ -162,6 +162,17 @@ const createInitialTest = async (req, res) => {
                 "explanation": "Las dos palabras contienen las mismas letras."
             }
         ]
+        const challengeFound = await Challenge.findOne({ code: '000000', "users.id": user.id })
+        if (challengeFound) {
+            const ts = await Task.find({ challenge: challengeFound._id });
+            if (ts.every(x => x.score == 20)) {
+                await User.findOneAndUpdate({ _id: user.id }, { test: true });
+                return res.status(200).send(challengeFound._id);
+            }
+            challengeFound.updatedAt = new Date();
+            await challengeFound.save();
+            return res.status(200).send(challengeFound._id);
+        }
         const data = { code: '000000', count: 5, lenguaje, users: [user], time: 60, tasks };
         const challenge = new Challenge(data);
         await challenge.save();
