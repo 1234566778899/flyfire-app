@@ -57,7 +57,7 @@ const generateIndividualChallenges = async (req, res) => {
                 }
             }
         ]);
-
+        console.log(result);
         if (result.length > 0) {
             avr = parseInt(result[0].averageScore / 2);
 
@@ -182,6 +182,7 @@ const createInitialTest = async (req, res) => {
         res.status(500).send({ error: 'Error en el servidor' });
     }
 }
+
 module.exports = {
     generate,
     getChallenge,

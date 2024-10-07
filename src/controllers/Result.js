@@ -2,6 +2,7 @@ const { OpenAI } = require('openai');
 const Result = require('../db/Schemas/Result');
 const Challenge = require('../db/Schemas/Challenge');
 const Task = require('../db/Schemas/Task');
+const { default: mongoose } = require('mongoose');
 require('dotenv').config();
 const openai = new OpenAI({
     apiKey: process.env.API_KEY
@@ -83,7 +84,6 @@ const getSubmissions = async (req, res) => {
 const getSubmissionsByTask = async (req, res) => {
     try {
         const { taskId } = req.params;
-        console.log(taskId)
         const results = await Result.find({ task: taskId });
         res.status(200).send(results);
     } catch (error) {
@@ -132,14 +132,26 @@ const getCurrentRanking = async (req, res) => {
         res.status(500).send({ error: 'Error en el servidor' });
     }
 };
-
+const getCountTaksWeek = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const lastWeekEpoch = new Date().valueOf() - 7 * 24 * 1000 * 3600;
+        const lastWeek = new Date(lastWeekEpoch);
+        const tasks = await Task.find({ user: id, score: 20, updatedAt: { $gte: lastWeek } });
+        const [result] = await Result.aggregate([{ $match: { user: new mongoose.Types.ObjectId(id) } }, { $group: { _id: null, total: { $sum: "$score" } } }])
+        return res.status(200).send({ count: tasks.length, score: (result && result.total) || 0 });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ error: 'Error on server' });
+    }
+}
 const generalRanking = async (req, res) => {
     try {
         const ranking = await Result.aggregate([
             {
                 $group: {
                     _id: "$user",
-                    averageScore: { $avg: "$score" }
+                    averageScore: { $sum: "$score" }
                 }
             },
             {
@@ -175,11 +187,13 @@ const generalRanking = async (req, res) => {
         return res.status(200).send({ error: 'Error on server' });
     }
 }
+
 module.exports = {
     addResult,
     getSubmissions,
     getCurrentRanking,
     generalRanking,
     getSubmissionsByTask,
-    addOneResult
+    addOneResult,
+    getCountTaksWeek,
 }

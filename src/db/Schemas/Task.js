@@ -8,9 +8,9 @@ const ChallengeSchema = Schema({
     example_input: String,
     example_output: String,
     explanation: String,
-    user: { type: mongoose.Schema.ObjectId, ref: 'user' },
+    user: { type: Schema.Types.ObjectId, ref: 'user' },
     lenguaje: String,
-    challenge: { type: mongoose.Schema.ObjectId, ref: 'challenge' },
+    challenge: { type: Schema.Types.ObjectId, ref: 'challenge' },
     score: Number,
     finished: { type: Boolean, default: false }
 }, {
