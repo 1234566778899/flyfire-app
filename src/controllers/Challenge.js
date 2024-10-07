@@ -11,6 +11,9 @@ const openai = new OpenAI({
 const generate = async (req, res) => {
     try {
         const { lenguaje, level, topics, count, users } = req.body;
+        if (count > 10) {
+            return res.status(400).send({ error: 'Limite de preguntas, máximo 10' });
+        }
         const chls = await Challenge.find({ "users.id": { $in: users.map(x => x.id) } })
         const tks = await Task.find({ challenge: chls._id });
         const allTitles = tks.map(task => task.title);
