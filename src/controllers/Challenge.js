@@ -57,7 +57,6 @@ const generateIndividualChallenges = async (req, res) => {
                 }
             }
         ]);
-        console.log(result);
         if (result.length > 0) {
             avr = parseInt(result[0].averageScore / 2);
 
