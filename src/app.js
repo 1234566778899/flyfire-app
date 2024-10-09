@@ -5,7 +5,7 @@ const server = require('http').createServer(app);
 
 app.use(express.json());
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://flyfar-liard.vercel.app'],
+    origin: ['http://localhost:3000', 'https://www.flyfar.website'],
     credentials: true
 }));
 
