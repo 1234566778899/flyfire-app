@@ -1,7 +1,7 @@
 const { Schema, model } = require('mongoose');
 
 const ChallengeSchema = Schema({
-    users: [{ id: String, username: String }],
+    users: [{ username: String, id: { type: Schema.Types.ObjectId, ref: 'user' } }],
     count: Number,
     lenguaje: String,
     topics: [String],

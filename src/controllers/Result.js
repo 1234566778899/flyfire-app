@@ -94,7 +94,7 @@ const getSubmissionsByTask = async (req, res) => {
 const getCurrentRanking = async (req, res) => {
     try {
         const { id } = req.params;
-        const challengeFound = await Challenge.findOne({ _id: id });
+        const challengeFound = await Challenge.findOne({ _id: id }).populate("users.id");
         const tasksInChallenge = await Task.find({ challenge: id });
         const allResults = await Result.find({ challenge: id });
         if (allResults.length <= 0) {
@@ -102,8 +102,7 @@ const getCurrentRanking = async (req, res) => {
         }
         const usersInChallenge = challengeFound.users;
         const ranking = usersInChallenge.map(user => {
-            const userResults = allResults.filter(result => result.user.toString() === user.id.toString());
-
+            const userResults = allResults.filter(result => result.user._id.toString() === user.id.toString());
             let total = 0;
             let t = 0;
             const tasks = tasksInChallenge.map(task => {
@@ -123,7 +122,7 @@ const getCurrentRanking = async (req, res) => {
                     };
                 }
             });
-            return { user: user.username, tasks, solved: tasks.filter(x => x.ended).length, total, time: t };
+            return { user: user.username, photo: user.id.photo || '', tasks, solved: tasks.filter(x => x.ended).length, total, time: t };
         });
         ranking.sort((a, b) => b.total - a.total);
         res.status(200).send(ranking);
