@@ -102,7 +102,7 @@ const getCurrentRanking = async (req, res) => {
         }
         const usersInChallenge = challengeFound.users;
         const ranking = usersInChallenge.map(user => {
-            const userResults = allResults.filter(result => result.user._id.toString() === user.id.toString());
+            const userResults = allResults.filter(result => result.user._id.toString() === user.id._id.toString());
             let total = 0;
             let t = 0;
             const tasks = tasksInChallenge.map(task => {
