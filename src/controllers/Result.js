@@ -187,6 +187,69 @@ const generalRanking = async (req, res) => {
     }
 }
 
+const getHistory = async (req, res) => {
+    try {
+        const { user, paginate } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(user)) {
+            return res.status(400).send({ error: 'ID de usuario inválido' });
+        }
+        const result = await Result.aggregate([
+            {
+                $match: {
+                    user: new mongoose.Types.ObjectId(user)
+                }
+            },
+            {
+                $group: {
+                    _id: "$task"
+                }
+            },
+            {
+                $lookup: {
+                    from: 'tasks',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'taskDetails'
+                }
+            },
+            {
+                $unwind: '$taskDetails'
+            },
+            {
+                $sort: {
+                    'taskDetails.createdAt': -1
+                }
+            },
+            {
+                $facet: {
+                    metadata: [
+                        { $count: "total" }
+                    ],
+                    data: [
+                        { $skip: (paginate - 1) * 20 },
+                        { $limit: 20 }
+                    ]
+                }
+            },
+            {
+                $project: {
+                    total: { $arrayElemAt: ["$metadata.total", 0] },
+                    data: 1
+                }
+            }
+        ]);
+        const total = result[0].total || 0;
+        const data = result[0].data;
+        return res.status(200).send({
+            total,
+            data
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send({ error: 'Error en el servidor' });
+    }
+}
 module.exports = {
     addResult,
     getSubmissions,
@@ -195,4 +258,5 @@ module.exports = {
     getSubmissionsByTask,
     addOneResult,
     getCountTaksWeek,
+    getHistory
 }
