@@ -1,3 +1,4 @@
+const Result = require("../db/Schemas/Result");
 const User = require("../db/Schemas/User");
 require('dotenv').config();
 const { BlobServiceClient } = require('@azure/storage-blob');
@@ -61,11 +62,67 @@ const updateTest = async (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error' });
     }
 }
+
+
+
+const findAllUsers = async (req, res) => {
+    try {
+        const init = new Date('2024-10-15');
+        const users = await User.aggregate([
+            {
+                $match: {
+                    active: true,
+                    createdAt: { $gte: init }
+                }
+            },
+            {
+                $lookup: {
+                    from: "results",
+                    localField: "_id",
+                    foreignField: "user",
+                    as: "resultados"
+                }
+            },
+            {
+                $addFields: {
+                    totalEjerciciosUnicos: {
+                        $size: {
+                            $ifNull: [{ $setUnion: "$resultados.task" }, []]
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    userId: "$_id",
+                    username: 1,
+                    name: 1,
+                    lname: 1,
+                    email: 1,
+                    createdAt: 1,
+                    test: 1,
+                    totalEjerciciosUnicos: 1
+                }
+            },
+            {
+                $sort: { totalEjerciciosUnicos: -1 }
+            }
+        ]);
+        return res.status(200).json(users);
+    } catch (error) {
+        console.error("Error en findAllUsers:", error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+
 module.exports = {
     register,
     getUser,
     updateUser,
     editPhoto,
-    updateTest
+    updateTest,
+    findAllUsers
 }
 
