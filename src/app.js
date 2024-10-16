@@ -15,7 +15,7 @@ require('./socket.js')(server);
 
 const PORT = process.env.PORT || 4000;
 app.get('/', (req, res) => {
-    res.send('v.1.0.1')
+    res.send('v.1.0.2')
 })
 
 app.use('/challenge', require('./routes/Challenge.js'));
