@@ -10,6 +10,10 @@ const sendRequest = async (req, res) => {
         if (!b) {
             return res.status(400).send({ error: 'Usuario no encontrado' });
         }
+        const isFriends = await Friend.findOne({ $or: [{ friend: userId, user: b._id }, { user: userId, friend: b._id }], status: 'accepted' });
+        if (isFriends) {
+            return res.status(400).send({ error: 'Ya son amigos' });
+        }
         const friendFound = await Friend.findOne({ user: userId, friend: b._id });
         if (friendFound) {
             return res.status(400).send({ error: 'La solicitud ya fue enviada' });
@@ -43,8 +47,18 @@ const getFriends = async (req, res) => {
         const friends = await Friend.find({ status: 'accepted', $or: [{ user: id }, { friend: id }] })
             .populate('user friend')
             .lean();
-        const data = friends.map(x => x.friend._id == id ? { ...x.user } : { ...x.friend })
+        const data = friends.map(x => x.friend._id == id ? { id: x._id, ...x.user } : { id: x._id, ...x.friend })
         return res.status(200).send(data);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ error: 'Error on server' });
+    }
+}
+const deleteFriend = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await Friend.findOneAndDelete({ _id: id });
+        return res.status(200).send({ ok: 'Eliminado' });
     } catch (error) {
         console.log(error);
         return res.status(500).send({ error: 'Error on server' });
@@ -53,5 +67,6 @@ const getFriends = async (req, res) => {
 module.exports = {
     sendRequest,
     getFriends,
-    changeStatus
+    changeStatus,
+    deleteFriend
 }
